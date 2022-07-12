@@ -444,6 +444,7 @@ img {
 
 .hero-right {
   padding-top: 40px;
+  padding-bottom: 40px;
   background: #F8FAFD;
 }
 
@@ -615,5 +616,6 @@ img {
 .page-link:active {
   border: 1px solid #0D75FF;
   border-radius: 4px;
-  color: #0D75FF;
+  background-color: #000000;
+  color: #fff;
 }

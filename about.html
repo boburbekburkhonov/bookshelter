@@ -38,13 +38,17 @@
     <!-- --------------- -->
     <div class="container">
       <div class="header-bottom">
-        <p class="header-bottom-desc">Showing
+        <p class="header-bottom-desc">Showing :
           <span class="header-bottom-showing">
             0
           </span>
-           Result
+           Result :
            <span class="header-bottom-result">
-
+            0
+           </span>
+           Page :
+           <span class="header-bottom-page">
+            1
            </span>
           </p>
 
@@ -89,7 +93,7 @@
     </section>
   </main>
 
-<!--
+  <!-- TEMPLATE-LIST -->
   <template class="list-template">
     <li class="hero-right-item">
       <img class="hero-right-list-img" src="" alt="book">
@@ -116,7 +120,66 @@
         </a>
       </div>
     </li>
-  </template> -->
+  </template>
+
+  <!-- TEMPLATE-MODAL -->
+  <template class="modal-template">
+    <div class="modal-top d-flex align-content-center justify-content-between">
+      <h3 class="modal-text"></h3>
+      <button class="close-modal"></button>
+    </div>
+
+    <div class="modal-center">
+      <img class="modal-img" src="${item.volumeInfo.imageLinks.smallThumbnail}" alt="book" width="228" height="300">
+      <p class="modal-desc">${item.volumeInfo.description}</p>
+    </div>
+
+    <ul class="modal-list list-unstyled">
+      <li class="modal-item d-flex align-items-center">
+        <h4 class="modal-list-heading">Author : </h4>
+
+        <p class="modal-list-desc author">
+        ${item.volumeInfo.authors}
+        </p>
+      </li>
+
+      <li class="modal-item d-flex align-items-center">
+        <h4 class="modal-list-heading">Published : </h4>
+
+        <p class="modal-list-desc published">
+        ${item.volumeInfo.publishedDate}
+        </p>
+      </li>
+
+      <li class="modal-item d-flex align-items-center">
+        <h4 class="modal-list-heading">Publishers : </h4>
+
+        <p class="modal-list-desc publishers">
+        ${item.volumeInfo.publisher}
+        </p>
+      </li>
+
+      <li class="modal-item d-flex align-items-center">
+        <h4 class="modal-list-heading">Categories : </h4>
+
+        <p class="modal-list-desc categories">
+          ${item.volumeInfo.categories}
+        </p>
+      </li>
+
+      <li class="modal-item d-flex align-items-center">
+        <h4 class="modal-list-heading">Pages Count : </h4>
+
+        <p class="modal-list-desc pages-count">
+        ${item.volumeInfo.pageCount}
+        </p>
+      </li>
+    </ul>
+
+    <div class="modal-btn-wrapper">
+      <a class="modal-read text-decoration-none" href="${item.volumeInfo.previewLink}" target="_blank">Read</a>
+    </div>
+  </template>
 
   <script src="./js/about.js"></script>
 </body>

@@ -1,8 +1,11 @@
 "use strict";
 
 const elList = document.querySelector(".hero-right-list")
+const elListTemplate = document.querySelector(".list-template").content
+const elModalTemplate = document.querySelector(".modal-template").content
 const elBooksShowing = document.querySelector(".header-bottom-showing")
 const elBooksResult = document.querySelector(".header-bottom-result")
+const elBooksPage = document.querySelector(".header-bottom-page")
 const elInput = document.querySelector(".header-input")
 const elModal = document.querySelector(".modal")
 const elOverlay = document.querySelector(".overlay")
@@ -10,7 +13,7 @@ const elSortBtn = document.querySelector(".header-bottom-btn")
 const elBookmarkList = document.querySelector(".hero-bookmark-list")
 const elPagination = document.querySelector(".pagination")
 
-let search = "hulk"
+let search = "python"
 let page = 1;
 let sort = "relevance"
 
@@ -33,58 +36,59 @@ logout.addEventListener("click", () => {
 
 const renderBooks = function(array, htmlElement){
   elPagination.innerHTML = null;
+
   for(let i = 1; i <= pagination[pagination.length - 1]; i++){
     const paginationHtml = `
     <li class="page-item"><a class="page-link" href="#">${i}</a></li>
     `
 
-
     elPagination.insertAdjacentHTML("beforeend", paginationHtml)
   }
 
+  const fragmentbooks = document.createDocumentFragment();
+
   array.forEach(item => {
-    const listHtml = `
-    <li class="hero-right-item">
-    <img src="${item.volumeInfo.imageLinks.smallThumbnail}" alt="book">
-    <div class="hero-right-list-wrapper">
-      <h5 class="hero-right-list-heading">${item.volumeInfo.title}</h5>
+    const cloneFragmentBooks = elListTemplate.cloneNode(true);
 
-      <p class="hero-right-list-desc">
-        ${item.volumeInfo.authors}
-      </p>
 
-      <p class="hero-right-list-desc-year">
-      ${item.volumeInfo.publishedDate}
-      </p>
 
-      <div class="hero-right-btn-wrapper d-flex justify-content-between">
-        <button id = ${item.id} class="hero-right-list-bookmark border-0">
-          Bookmark
-        </button>
-        <button href="#" id = ${item.id} class="hero-right-list-more-info border-0">
-          More Info
-        </button>
-      </div>
-      <a href="${item.volumeInfo.previewLink}" class="hero-right-list-read text-decoration-none" target="_blank">
-        Read
-      </a>
-    </div>
-  </li>
-    `
+    if(item.volumeInfo.imageLinks.smallThumbnail){
+      cloneFragmentBooks.querySelector(".hero-right-list-img").src = item.volumeInfo.imageLinks.smallThumbnail
+    } else {
+      cloneFragmentBooks.querySelector(".hero-right-list-img").src = "No Img"
+    }
+    cloneFragmentBooks.querySelector(".hero-right-list-heading").textContent = item.volumeInfo.title
+    if(item.volumeInfo.authors){
+      cloneFragmentBooks.querySelector(".hero-right-list-desc").textContent = item.volumeInfo.authors
+    } else {
+      cloneFragmentBooks.querySelector(".hero-right-list-desc").textContent = "No author"
+    }
+    cloneFragmentBooks.querySelector(".hero-right-list-desc-year").textContent = item.volumeInfo.publishedDate
+    cloneFragmentBooks.querySelector(".hero-right-list-bookmark").id = item.id
+    cloneFragmentBooks.querySelector(".hero-right-list-more-info").id = item.id
+    cloneFragmentBooks.querySelector(".hero-right-list-read").href = item.volumeInfo.previewLink;
 
-    htmlElement.insertAdjacentHTML("beforeend", listHtml)
+
+    fragmentbooks.appendChild(cloneFragmentBooks)
   })
+  htmlElement.appendChild(fragmentbooks)
 }
+
+// FETCH --------------------------------
 
 const getBooks = async function(){
   try{
     const request = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${search}&startIndex=${page}&orderBy=${sort}`)
 
+    const requestPagination = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${search}&startIndex=61&orderBy=${sort}`)
+
     const data = await request.json();
+    const dataPagination = await requestPagination.json()
+
     books.push(...data.items)
 
     elBooksShowing.textContent = data.items.length;
-    elBooksResult.textContent = data.totalItems;
+    elBooksResult.textContent = dataPagination.totalItems;
 
     if(page <= 1){
       prevBtn.disabled = true
@@ -92,9 +96,10 @@ const getBooks = async function(){
       prevBtn.disabled = false
     }
 
-    pagination.push(Math.round((data.totalItems / 10) / 2))
+    pagination.push(Math.floor((dataPagination.totalItems / 10) / 10))
 
-    if(Math.ceil(Math.round(data.totalItems / 10) / 2) < page){
+
+    if(Math.floor(dataPagination.totalItems / 10) < page + 10){
       nextBtn.disabled = true;
     } else {
       nextBtn.disabled = false;
@@ -107,17 +112,21 @@ const getBooks = async function(){
   } catch (err){
     const errHeading = document.createElement("h2");
 
+    elBooksShowing.textContent = 0;
+    elBooksResult.textContent = 0;
+
     alert(err.message)
-    errHeading.textContent = "Topilmadi..."
+    errHeading.textContent = "Uzr backenddan ma'lumot topilmadi, boshqa pagedan qidirib ko'ring..."
     errHeading.setAttribute("class", "h1 text-danger")
 
+    elList.innerHTML = null;
     elList.appendChild(errHeading)
   }
 }
 
 getBooks()
 
-// INPUT-SEARCH ------------------------------
+// // INPUT-SEARCH ------------------------------
 
 elInput.addEventListener("change", () => {
   const inputValue = elInput.value;
@@ -128,93 +137,81 @@ elInput.addEventListener("change", () => {
   getBooks()
 })
 
+// SORT-BTN -----------------------------------------
+
 elSortBtn.addEventListener("click", () => {
   sort = "newest ";
+  page = 1
+  elBooksPage.textContent = page;
   elList.innerHTML = null;
   getBooks()
 })
 
+// PAGINATION -----------------------------------------
+
 prevBtn.addEventListener("click", () => {
   page -= 10;
+  elBooksPage.textContent = Math.round(page / 10);
   elList.innerHTML = null;
   getBooks()
 })
 
 nextBtn.addEventListener("click", () => {
   page += 10;
+  elBooksPage.textContent = Math.round(page / 10);
   elList.innerHTML = null;
   getBooks()
 })
 
 elPagination.addEventListener("click", (evt) => {
   const chosePaginationPage = evt.target.textContent * 10;
+  page = 1;
   page += chosePaginationPage;
+  elBooksPage.textContent = Math.round(page / 10);
   elList.innerHTML = null;
   getBooks();
 })
 
-// MODAL ------------------------------------
+// // MODAL ------------------------------------
 
 const renderModal = function(item, htmlElement){
-  const htmlMoreInfo = `
-  <div class="modal-top d-flex align-content-center justify-content-between">
-  <h3 class="modal-text">${item.volumeInfo.title}</h3>
-  <button class="close-modal"></button>
-</div>
+  const fragmentModal = document.createDocumentFragment();
 
-<div class="modal-center">
-  <img src="${item.volumeInfo.imageLinks.smallThumbnail}" alt="book" width="228" height="300">
-  <p class="modal-desc">${item.volumeInfo.description}</p>
-</div>
+  const cloneFragmentModal = elModalTemplate.cloneNode(true);
 
-<ul class="modal-list list-unstyled">
-  <li class="modal-item d-flex align-items-center">
-    <h4 class="modal-list-heading">Author : </h4>
+  cloneFragmentModal.querySelector(".modal-text").textContent = item.volumeInfo.title;
+  cloneFragmentModal.querySelector(".modal-img").src = item.volumeInfo.imageLinks.smallThumbnail;
+  cloneFragmentModal.querySelector(".modal-desc").textContent = item.volumeInfo.description
+  if(item.volumeInfo.authors){
+    cloneFragmentModal.querySelector(".author").textContent = item.volumeInfo.authors
+  } else {
+    cloneFragmentModal.querySelector(".author").textContent = "No Author"
+  }
+  cloneFragmentModal.querySelector(".published").textContent = item.volumeInfo.publishedDate
 
-    <p class="modal-list-desc">
-    ${item.volumeInfo.authors}
-    </p>
-  </li>
+  if(item.volumeInfo.publisher){
+    cloneFragmentModal.querySelector(".publishers").textContent = item.volumeInfo.publisher
+  } else {
+    cloneFragmentModal.querySelector(".publishers").textContent = "No Publishers"
+  }
 
-  <li class="modal-item d-flex align-items-center">
-    <h4 class="modal-list-heading">Published : </h4>
+  if(item.volumeInfo.categories){
+    cloneFragmentModal.querySelector(".categories").textContent = item.volumeInfo.categories
+  } else {
+    cloneFragmentModal.querySelector(".categories").textContent = "No Categories"
+  }
 
-    <p class="modal-list-desc">
-    ${item.volumeInfo.publishedDate}
-    </p>
-  </li>
+  if(item.volumeInfo.pageCount){
+    cloneFragmentModal.querySelector(".pages-count").textContent = item.volumeInfo.pageCount
+  } else {
+    cloneFragmentModal.querySelector(".pages-count").textContent = "No Page-Count"
+  }
+  cloneFragmentModal.querySelector(".modal-read").href = item.volumeInfo.previewLink
 
-  <li class="modal-item d-flex align-items-center">
-    <h4 class="modal-list-heading">Publishers : </h4>
 
-    <p class="modal-list-desc">
-    ${item.volumeInfo.publisher}
-    </p>
-  </li>
 
-  <li class="modal-item d-flex align-items-center">
-    <h4 class="modal-list-heading">Categories : </h4>
-
-    <p class="modal-list-desc">
-      ${item.volumeInfo.categories}
-    </p>
-  </li>
-
-  <li class="modal-item d-flex align-items-center">
-    <h4 class="modal-list-heading">Pages Count : </h4>
-
-    <p class="modal-list-desc">
-    ${item.volumeInfo.pageCount}
-    </p>
-  </li>
-</ul>
-
-<div class="modal-btn-wrapper">
-  <a class="modal-read text-decoration-none" href="${item.volumeInfo.previewLink}" target="_blank">Read</a>
-</div>
-  `
-
-  htmlElement.insertAdjacentHTML("beforeend", htmlMoreInfo);item
+  fragmentModal.appendChild(cloneFragmentModal)
+  htmlElement.appendChild(fragmentModal);
 }
 
 elList.addEventListener("click", (evt) => {
@@ -255,7 +252,7 @@ function close(){
   elOverlay.classList.add("d-none");
 }
 
-// BOOKMARK ---------------------------------
+// // BOOKMARK ---------------------------------
 
 const renderBookmark = function(arr, htmlElement){
   arr.forEach(item => {
@@ -281,7 +278,6 @@ const renderBookmark = function(arr, htmlElement){
     htmlElement.insertAdjacentHTML("beforeend", htmlBookmark)
   })
 }
-
 
 renderBookmark(bookmark, elBookmarkList)
 
