@@ -158,7 +158,7 @@ elInput.addEventListener("change", () => {
 // SORT-BTN -----------------------------------------
 
 elSortBtn.addEventListener("click", () => {
-  sort = "newest ";
+  sort = "newest";
   elList.innerHTML = null;
   getBooks()
 })
