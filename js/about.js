@@ -22,11 +22,12 @@ let books = [];
 const localStorageBookmark = JSON.parse(window.localStorage.getItem("bookmark"))
 const bookmark = localStorageBookmark || []
 
+// TOKEN-LOGOUT ----------------------------
 const token = window.localStorage.getItem("token")
 
-// if(!token){
-//   window.location.replace("index.html")
-// }
+if(!token){
+  window.location.replace("index.html")
+}
 
 logout.addEventListener("click", () => {
   window.localStorage.removeItem("token")
@@ -34,10 +35,12 @@ logout.addEventListener("click", () => {
   window.location.replace("index.html")
 })
 
+// ------------------------------------------
+
 const renderBooks = function(array, htmlElement){
   elPagination.innerHTML = null;
 
-  for(let i = 1; i <= pagination[pagination.length - 1]; i++){
+  for(let i = 0; i <= pagination[pagination.length - 1]; i++){
     const paginationHtml = `
     <li class="page-item"><a class="page-link" href="#">${i}</a></li>
     `
@@ -50,8 +53,6 @@ const renderBooks = function(array, htmlElement){
   array.forEach(item => {
     const cloneFragmentBooks = elListTemplate.cloneNode(true);
 
-
-
     if(item.volumeInfo.imageLinks.smallThumbnail){
       cloneFragmentBooks.querySelector(".hero-right-list-img").src = item.volumeInfo.imageLinks.smallThumbnail
     } else {
@@ -63,6 +64,7 @@ const renderBooks = function(array, htmlElement){
     } else {
       cloneFragmentBooks.querySelector(".hero-right-list-desc").textContent = "No author"
     }
+
     cloneFragmentBooks.querySelector(".hero-right-list-desc-year").textContent = item.volumeInfo.publishedDate
     cloneFragmentBooks.querySelector(".hero-right-list-bookmark").id = item.id
     cloneFragmentBooks.querySelector(".hero-right-list-more-info").id = item.id
@@ -88,7 +90,12 @@ const getBooks = async function(){
     books.push(...data.items)
 
     elBooksShowing.textContent = data.items.length;
-    elBooksResult.textContent = dataPagination.totalItems;
+
+    if(dataPagination.totalItems < 100){
+      elBooksResult.textContent = 0;
+    }else {
+      elBooksResult.textContent = dataPagination.totalItems;
+    }
 
     if(page <= 1){
       prevBtn.disabled = true
@@ -97,7 +104,6 @@ const getBooks = async function(){
     }
 
     pagination.push(Math.floor((dataPagination.totalItems / 10) / 10))
-
 
     if(Math.floor(dataPagination.totalItems / 10) < page + 10){
       nextBtn.disabled = true;
@@ -115,8 +121,20 @@ const getBooks = async function(){
     elBooksShowing.textContent = 0;
     elBooksResult.textContent = 0;
 
-    alert(err.message)
-    errHeading.textContent = "Uzr backenddan ma'lumot topilmadi, boshqa pagedan qidirib ko'ring..."
+    if(page <= 1){
+      prevBtn.disabled = true
+    } else {
+      prevBtn.disabled = false
+    }
+
+    if(Math.floor(page / 10) === pagination[pagination.length - 1]){
+      nextBtn.disabled = true;
+    } else {
+      nextBtn.disabled = false;
+    }
+
+    alert(err.message);
+    errHeading.textContent = "Uzr boshqa pagelardan qidirib ko'ring, agar boshqa pagelarda ham bo'lmasa bunday ma'lumotni topolmadik..."
     errHeading.setAttribute("class", "h1 text-danger")
 
     elList.innerHTML = null;
@@ -132,7 +150,7 @@ elInput.addEventListener("change", () => {
   const inputValue = elInput.value;
   elInput.value = null;
   search = inputValue
-  page = 1
+  page = 1;
   elList.innerHTML = null
   getBooks()
 })
@@ -141,8 +159,6 @@ elInput.addEventListener("change", () => {
 
 elSortBtn.addEventListener("click", () => {
   sort = "newest ";
-  page = 1
-  elBooksPage.textContent = page;
   elList.innerHTML = null;
   getBooks()
 })
@@ -182,12 +198,18 @@ const renderModal = function(item, htmlElement){
   cloneFragmentModal.querySelector(".modal-text").textContent = item.volumeInfo.title;
   cloneFragmentModal.querySelector(".modal-img").src = item.volumeInfo.imageLinks.smallThumbnail;
   cloneFragmentModal.querySelector(".modal-desc").textContent = item.volumeInfo.description
+
   if(item.volumeInfo.authors){
     cloneFragmentModal.querySelector(".author").textContent = item.volumeInfo.authors
   } else {
     cloneFragmentModal.querySelector(".author").textContent = "No Author"
   }
-  cloneFragmentModal.querySelector(".published").textContent = item.volumeInfo.publishedDate
+
+  if(item.volumeInfo.publishedDate){
+    cloneFragmentModal.querySelector(".published").textContent = item.volumeInfo.publishedDate
+  } else {
+    cloneFragmentModal.querySelector(".published").textContent =  "No Published"
+  }
 
   if(item.volumeInfo.publisher){
     cloneFragmentModal.querySelector(".publishers").textContent = item.volumeInfo.publisher
@@ -206,6 +228,7 @@ const renderModal = function(item, htmlElement){
   } else {
     cloneFragmentModal.querySelector(".pages-count").textContent = "No Page-Count"
   }
+
   cloneFragmentModal.querySelector(".modal-read").href = item.volumeInfo.previewLink
 
 
