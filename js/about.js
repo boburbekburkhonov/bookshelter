@@ -25,9 +25,9 @@ const bookmark = localStorageBookmark || []
 // TOKEN-LOGOUT ----------------------------
 const token = window.localStorage.getItem("token")
 
-// if(!token){
-//   window.location.replace("index.html")
-// }
+if(!token){
+  window.location.replace("index.html")
+}
 
 logout.addEventListener("click", () => {
   window.localStorage.removeItem("token")
