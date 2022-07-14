@@ -50,25 +50,25 @@ const renderBooks = function(array, htmlElement){
 
   const fragmentbooks = document.createDocumentFragment();
 
-  array.forEach(item => {
+  array?.forEach(item => {
     const cloneFragmentBooks = elListTemplate.cloneNode(true);
 
-    if(item.volumeInfo.imageLinks.smallThumbnail){
-      cloneFragmentBooks.querySelector(".hero-right-list-img").src = item.volumeInfo.imageLinks.smallThumbnail
+    if(item.volumeInfo.imageLinks?.smallThumbnail){
+      cloneFragmentBooks.querySelector(".hero-right-list-img").src = item.volumeInfo.imageLinks?.smallThumbnail
     } else {
       cloneFragmentBooks.querySelector(".hero-right-list-img").src = "No Img"
     }
-    cloneFragmentBooks.querySelector(".hero-right-list-heading").textContent = item.volumeInfo.title
-    if(item.volumeInfo.authors){
-      cloneFragmentBooks.querySelector(".hero-right-list-desc").textContent = item.volumeInfo.authors
+    cloneFragmentBooks.querySelector(".hero-right-list-heading").textContent = item.volumeInfo?.title
+    if(item.volumeInfo?.authors){
+      cloneFragmentBooks.querySelector(".hero-right-list-desc").textContent = item.volumeInfo?.authors
     } else {
       cloneFragmentBooks.querySelector(".hero-right-list-desc").textContent = "No author"
     }
 
-    cloneFragmentBooks.querySelector(".hero-right-list-desc-year").textContent = item.volumeInfo.publishedDate
+    cloneFragmentBooks.querySelector(".hero-right-list-desc-year").textContent = item.volumeInfo?.publishedDate
     cloneFragmentBooks.querySelector(".hero-right-list-bookmark").id = item.id
     cloneFragmentBooks.querySelector(".hero-right-list-more-info").id = item.id
-    cloneFragmentBooks.querySelector(".hero-right-list-read").href = item.volumeInfo.previewLink;
+    cloneFragmentBooks.querySelector(".hero-right-list-read").href = item.volumeInfo?.previewLink;
 
 
     fragmentbooks.appendChild(cloneFragmentBooks)
@@ -115,26 +115,18 @@ const getBooks = async function(){
       renderBooks(data.items, elList)
     }
 
-  } catch (err){
+  } catch {
     const errHeading = document.createElement("h2");
 
     elBooksShowing.textContent = 0;
     elBooksResult.textContent = 0;
 
-    if(page <= 1){
-      prevBtn.disabled = true
-    } else {
-      prevBtn.disabled = false
-    }
+    elPagination.innerHTML = null;
 
-    if(Math.floor(page / 10) === pagination[pagination.length - 1]){
-      nextBtn.disabled = true;
-    } else {
-      nextBtn.disabled = false;
-    }
+    prevBtn.disabled = true
+    nextBtn.disabled = true;
 
-    alert(err.message);
-    errHeading.textContent = "Uzr boshqa pagelardan qidirib ko'ring, agar boshqa pagelarda ham bo'lmasa bunday ma'lumotni topolmadik..."
+    errHeading.textContent = "Uzr ma'lumotni topolmadik..."
     errHeading.setAttribute("class", "h1 text-danger")
 
     elList.innerHTML = null;
