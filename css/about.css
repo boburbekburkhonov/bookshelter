@@ -74,6 +74,7 @@ html {
 
 body {
   margin: 0;
+  margin-top: 170px;
   padding: 0;
   font-family: 'Rubik', 'Noto Sans', 'Montserrat', sans-serif;
 }
@@ -280,11 +281,16 @@ img {
 
 .hero-bookmark-remove:active {
   opacity: 0.4;
-}remove
+}
 
 /* HEADER */
 
 .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
   padding-top: 14px;
 }
 
