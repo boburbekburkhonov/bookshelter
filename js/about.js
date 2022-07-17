@@ -141,6 +141,7 @@ getBooks()
 elInput.addEventListener("change", () => {
   const inputValue = elInput.value;
   elInput.value = null;
+  elBooksPage.textContent = 0;
   search = inputValue
   page = 1;
   elList.innerHTML = null
